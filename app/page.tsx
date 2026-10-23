@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 
 export default function Home() {
-  // Stany formularza
   const [footLength, setFootLength] = useState<string>('');
   const [margin, setMargin] = useState<string>('0.5');
   const [shoeType, setShoeType] = useState<string>('Sneakersy / Miejskie');
@@ -12,14 +11,13 @@ export default function Home() {
   const [gender, setGender] = useState<string>('Uniseks');
   const [additionalInfo, setAdditionalInfo] = useState<string>('');
 
-  // Stany aplikacji
   const [loading, setLoading] = useState<boolean>(false);
   const [cooldown, setCooldown] = useState<number>(0);
   const [results, setResults] = useState<any[]>([]);
+  const [aiGreeting, setAiGreeting] = useState<string>('');
   const [visibleCount, setVisibleCount] = useState<number>(5);
   const [error, setError] = useState<string | null>(null);
 
-  // Odliczanie cooldownu
   useEffect(() => {
     if (cooldown > 0) {
       const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
@@ -31,7 +29,6 @@ export default function Home() {
     e.preventDefault();
     const lengthNum = parseFloat(footLength);
 
-    // Walidacja bezpieczeństwa i zakresu
     if (isNaN(lengthNum) || lengthNum < 9 || lengthNum > 35) {
       setError('Długość stopy musi wynosić od 9.0 cm do 35.0 cm.');
       return;
@@ -40,8 +37,9 @@ export default function Home() {
     setError(null);
     setLoading(true);
     setResults([]);
+    setAiGreeting('');
 
-    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://twoj-backend.onrender.com';
+    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '[https://twoj-backend.onrender.com](https://twoj-backend.onrender.com)';
     const cleanUrl = baseUrl.replace(/\/$/, '');
 
     const payload = {
@@ -67,10 +65,11 @@ export default function Home() {
 
       const data = await res.json();
       setResults(data.results || []);
+      setAiGreeting(data.ai_greeting || 'Patrz i wybieraj! Oto najlepsze oferty dla Ciebie:');
       setVisibleCount(5);
       setCooldown(15);
     } catch (err: any) {
-      setError('Nie udało się połączyć z serwerem. Jeśli serwer się wybudza, spróbuj ponownie za chwilę.');
+      setError('Nie udało się połączyć z serwerem. Spróbuj ponownie za chwilę.');
     } finally {
       setLoading(false);
     }
@@ -78,18 +77,18 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-100 text-emerald-950 p-4 md:p-8 font-sans">
-      <div className="max-w-2xl mx-auto bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-6 md:p-10 border border-emerald-100">
+      <div className="max-w-2xl mx-auto bg-white/95 backdrop-blur-md rounded-3xl shadow-xl p-6 md:p-10 border border-emerald-100">
         
         {/* NAGŁÓWEK */}
         <div className="text-center mb-8">
           <span className="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full mb-2 tracking-wide uppercase">
-            AI Size Matcher
+            AI Size Matcher v1.1
           </span>
           <h1 className="text-3xl md:text-4xl font-extrabold text-emerald-900 tracking-tight">
             Buty AI Helper 👟
           </h1>
           <p className="text-emerald-600 mt-2 text-sm md:text-base max-w-md mx-auto">
-            Wprowadź wymiary i preferencje – sztuczna inteligencja dobierze dla Ciebie idealne modele z polskich sklepów.
+            Wprowadź wymiary i preferencje – znajdziemy dla Ciebie najlepszą ofertę z polskich sklepów.
           </p>
         </div>
 
@@ -106,7 +105,6 @@ export default function Home() {
         {/* FORMULARZ */}
         <form onSubmit={handleSubmit} className="space-y-6">
           
-          {/* SEKZJA 1: Wymiary podstawowe */}
           <div className="p-5 bg-emerald-50/40 rounded-2xl border border-emerald-100 space-y-4">
             <h2 className="text-sm font-bold uppercase tracking-wider text-emerald-800">
               1. Wymiary stopy
@@ -147,7 +145,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* SEKCJA 2: Preferencje obuwia */}
           <div className="p-5 bg-emerald-50/40 rounded-2xl border border-emerald-100 space-y-4">
             <h2 className="text-sm font-bold uppercase tracking-wider text-emerald-800">
               2. Preferencje i przeznaczenie
@@ -221,14 +218,13 @@ export default function Home() {
               </div>
             </div>
 
-            {/* WOLNE POLE NA DODATKOWE INFORMACJE */}
             <div>
               <label className="block text-sm font-semibold mb-1.5 text-emerald-900">
                 Dodatkowe informacje / uwagi dla AI (opcjonalnie)
               </label>
               <textarea
                 rows={2}
-                placeholder="np. wysokie podbicie, szeroka stopa, szukam butów bardzo lekkich na lato..."
+                placeholder="np. wysokie podbicie, szeroka stopa, szukam lekkich butów..."
                 value={additionalInfo}
                 onChange={(e) => setAdditionalInfo(e.target.value)}
                 className="w-full p-3.5 bg-white border-2 border-emerald-200 rounded-xl focus:border-emerald-600 focus:outline-none text-base shadow-sm transition resize-none"
@@ -236,14 +232,12 @@ export default function Home() {
             </div>
           </div>
 
-          {/* BŁĄD WALIDACJI */}
           {error && (
             <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-2xl shadow-sm">
               {error}
             </div>
           )}
 
-          {/* WYRAZISTY, NOWOCZESNY PRZYCISK WYSYŁANIA */}
           <button
             type="submit"
             disabled={loading || cooldown > 0}
@@ -251,49 +245,77 @@ export default function Home() {
           >
             {loading ? (
               <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span>Analizuję oferty przez Gemini AI...</span>
+                <span>Szukam najlepszych ofert...</span>
               </>
             ) : cooldown > 0 ? (
               <span>⏳ Odczekaj chwilę ({cooldown}s)</span>
             ) : (
-              <>
-                <span>✨ Znajdź dopasowane buty</span>
-              </>
+              <span>✨ Znajdź dopasowane buty</span>
             )}
           </button>
         </form>
 
-        {/* WYNIKI */}
+        {/* WYNIKI WERSJI 1.1 */}
         {results.length > 0 && (
-          <div className="mt-10 space-y-4 pt-6 border-t border-emerald-100">
-            <h2 className="text-xl font-extrabold text-emerald-900 flex items-center justify-between">
-              <span>Rekomendowane oferty</span>
+          <div className="mt-10 space-y-6 pt-6 border-t border-emerald-100">
+            
+            {/* SPERSONALIZOWANY, HUMORYSTYCZNY TEKST */}
+            {aiGreeting && (
+              <div className="p-4 bg-emerald-100/70 border border-emerald-300 rounded-2xl text-emerald-950 font-medium text-center shadow-sm">
+                🎉 {aiGreeting}
+              </div>
+            )}
+
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-extrabold text-emerald-900">
+                Najlepsze oferty dla Ciebie
+              </h2>
               <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full">
                 Znaleziono: {results.length}
               </span>
-            </h2>
+            </div>
             
-            <div className="space-y-3">
+            {/* OSOBNE KARTY / LABELKI DLA KAŻDEJ OFERTY */}
+            <div className="space-y-4">
               {results.slice(0, visibleCount).map((item, index) => (
-                <div key={index} className="p-4 border border-emerald-100 bg-white rounded-2xl flex justify-between items-center shadow-sm hover:shadow-md transition">
-                  <div>
-                    <h3 className="font-bold text-emerald-950 text-base">{item.brand} {item.model}</h3>
-                    <p className="text-xs text-emerald-700 mt-1">
-                      Zalecany rozmiar: <span className="font-bold text-emerald-900 bg-emerald-50 px-1.5 py-0.5 rounded">{item.recommended_size}</span> (wkładka: {item.insole_cm} cm)
-                    </p>
+                <div key={index} className="p-4 bg-white border-2 border-emerald-100 rounded-2xl shadow-sm hover:shadow-md transition flex flex-col sm:flex-row gap-4 items-center">
+                  
+                  {/* ZDJĘCIE BUTA */}
+                  <div className="w-full sm:w-28 h-28 bg-emerald-50 rounded-xl overflow-hidden flex-shrink-0 border border-emerald-100 relative">
+                    <img 
+                      src={item.image_url || "[https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80](https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80)"} 
+                      alt={item.model}
+                      className="w-full h-full object-cover"
+                      onError={(e: any) => { e.target.src = "[https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=400&q=80](https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=400&q=80)"; }}
+                    />
                   </div>
-                  <a
-                    href={item.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl transition shadow-sm"
-                  >
-                    Zobacz
-                  </a>
+
+                  {/* INFORMACJE O OFERCIE */}
+                  <div className="flex-grow text-center sm:text-left">
+                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">{item.brand}</span>
+                    <h3 className="font-extrabold text-emerald-950 text-lg leading-snug">{item.model}</h3>
+                    <div className="mt-2 text-xs text-emerald-800 space-y-0.5">
+                      <p>Zalecany rozmiar: <span className="font-bold text-emerald-950 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">{item.recommended_size}</span></p>
+                      <p>Wymagana wkładka: <span className="font-semibold">{item.insole_cm} cm</span></p>
+                    </div>
+                  </div>
+
+                  {/* PRZYCISK DO KONKRETNEJ OFERTY */}
+                  <div className="w-full sm:w-auto flex-shrink-0">
+                    <a
+                      href={item.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full sm:w-auto inline-flex justify-center items-center px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition shadow-md"
+                    >
+                      Sprawdź ofertę ➔
+                    </a>
+                  </div>
+
                 </div>
               ))}
             </div>
@@ -303,7 +325,7 @@ export default function Home() {
                 onClick={() => setVisibleCount(visibleCount + 5)}
                 className="w-full py-3 bg-emerald-100/80 hover:bg-emerald-200 text-emerald-900 font-bold rounded-2xl transition text-sm shadow-sm mt-4"
               >
-                Pokaż kolejne 5 ofert 👇
+                Pokaż kolejne oferty 👇
               </button>
             )}
           </div>
