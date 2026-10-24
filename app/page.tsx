@@ -294,9 +294,16 @@ export default function Home() {
                     />
                   </div>
 
-                  {/* INFORMACJE O OFERCIE */}
+                  {/* INFORMACJE O OFERCIE + CENA */}
                   <div className="flex-grow text-center sm:text-left">
-                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">{item.brand}</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">{item.brand}</span>
+                      {item.price && (
+                        <span className="inline-block px-2.5 py-0.5 bg-teal-50 text-teal-800 border border-teal-200 text-xs font-extrabold rounded-full">
+                          {item.price}
+                        </span>
+                      )}
+                    </div>
                     <h3 className="font-extrabold text-emerald-950 text-lg leading-snug">{item.model}</h3>
                     <div className="mt-2 text-xs text-emerald-800 space-y-0.5">
                       <p>Zalecany rozmiar: <span className="font-bold text-emerald-950 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">{item.recommended_size}</span></p>
