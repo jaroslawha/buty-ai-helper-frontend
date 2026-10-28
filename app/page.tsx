@@ -2,6 +2,16 @@
 
 import { useState, useEffect } from 'react';
 
+interface ShoeResult {
+  brand: string;
+  model: string;
+  recommended_size: string;
+  insole_cm: number;
+  price?: string;
+  link: string;
+  image_url?: string;
+}
+
 export default function Home() {
   const [footLength, setFootLength] = useState<string>('');
   const [margin, setMargin] = useState<string>('0.5');
@@ -13,9 +23,8 @@ export default function Home() {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [cooldown, setCooldown] = useState<number>(0);
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<ShoeResult[]>([]);
   const [aiGreeting, setAiGreeting] = useState<string>('');
-  const [visibleCount, setVisibleCount] = useState<number>(5);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -39,7 +48,7 @@ export default function Home() {
     setResults([]);
     setAiGreeting('');
 
-    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '[https://twoj-backend.onrender.com](https://twoj-backend.onrender.com)';
+    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://twoj-backend.onrender.com';
     const cleanUrl = baseUrl.replace(/\/$/, '');
 
     const payload = {
@@ -65,8 +74,7 @@ export default function Home() {
 
       const data = await res.json();
       setResults(data.results || []);
-      setAiGreeting(data.ai_greeting || 'Patrz i wybieraj! Oto najlepsze oferty dla Ciebie:');
-      setVisibleCount(5);
+      setAiGreeting(data.ai_greeting || '');
       setCooldown(15);
     } catch (err: any) {
       setError('Nie udało się połączyć z serwerem. Spróbuj ponownie za chwilę.');
@@ -88,7 +96,7 @@ export default function Home() {
             Buty AI Helper 👟
           </h1>
           <p className="text-emerald-600 mt-2 text-sm md:text-base max-w-md mx-auto">
-            Wprowadź wymiary i preferencje – znajdziemy dla Ciebie najlepszą ofertę z polskich sklepów.
+            Wprowadź wymiary i preferencje – znajdziemy dla Ciebie 3 najlepsze oferty.
           </p>
         </div>
 
@@ -104,7 +112,6 @@ export default function Home() {
 
         {/* FORMULARZ */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          
           <div className="p-5 bg-emerald-50/40 rounded-2xl border border-emerald-100 space-y-4">
             <h2 className="text-sm font-bold uppercase tracking-wider text-emerald-800">
               1. Wymiary stopy
@@ -245,7 +252,7 @@ export default function Home() {
           >
             {loading ? (
               <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
@@ -259,82 +266,87 @@ export default function Home() {
           </button>
         </form>
 
-        {/* WYNIKI WERSJI 1.1 */}
+        {/* SEKACJA WYNIKÓW */}
         {results.length > 0 && (
           <div className="mt-10 space-y-6 pt-6 border-t border-emerald-100">
             
-            {/* SPERSONALIZOWANY, HUMORYSTYCZNY TEKST */}
+            {/* SPERSONALIZOWANE POWITANIE AI */}
             {aiGreeting && (
-              <div className="p-4 bg-emerald-100/70 border border-emerald-300 rounded-2xl text-emerald-950 font-medium text-center shadow-sm">
+              <div className="p-4 bg-emerald-100/80 border border-emerald-300 rounded-2xl text-emerald-950 font-medium text-center shadow-sm text-sm md:text-base">
                 🎉 {aiGreeting}
               </div>
             )}
 
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-extrabold text-emerald-900">
-                Najlepsze oferty dla Ciebie
+                Rekomendowane oferty
               </h2>
               <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full">
                 Znaleziono: {results.length}
               </span>
             </div>
             
-            {/* OSOBNE KARTY / LABELKI DLA KAŻDEJ OFERTY */}
+            {/* LISTA KART / LABELEK */}
             <div className="space-y-4">
-              {results.slice(0, visibleCount).map((item, index) => (
-                <div key={index} className="p-4 bg-white border-2 border-emerald-100 rounded-2xl shadow-sm hover:shadow-md transition flex flex-col sm:flex-row gap-4 items-center">
-                  
-                  {/* ZDJĘCIE BUTA */}
-                  <div className="w-full sm:w-28 h-28 bg-emerald-50 rounded-xl overflow-hidden flex-shrink-0 border border-emerald-100 relative">
+              {results.map((item, index) => (
+                <div 
+                  key={index} 
+                  className="p-5 bg-white border-2 border-emerald-100 rounded-2xl shadow-sm hover:shadow-md transition flex flex-col sm:flex-row gap-4 items-center"
+                >
+                  {/* MINIATURKA ZDJĘCIA */}
+                  <div className="w-full sm:w-28 h-28 bg-emerald-50 rounded-xl overflow-hidden flex-shrink-0 border border-emerald-100 relative flex items-center justify-center">
                     <img 
-                      src={item.image_url || "[https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80](https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80)"} 
+                      src={item.image_url || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80"} 
                       alt={item.model}
                       className="w-full h-full object-cover"
-                      onError={(e: any) => { e.target.src = "[https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=400&q=80](https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=400&q=80)"; }}
+                      onError={(e: any) => { 
+                        e.target.src = "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=400&q=80"; 
+                      }}
                     />
                   </div>
 
-                  {/* INFORMACJE O OFERCIE + CENA */}
-                  <div className="flex-grow text-center sm:text-left">
+                  {/* DANE OFERTY */}
+                  <div className="flex-grow text-center sm:text-left space-y-1">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">{item.brand}</span>
+                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
+                        {item.brand}
+                      </span>
                       {item.price && (
-                        <span className="inline-block px-2.5 py-0.5 bg-teal-50 text-teal-800 border border-teal-200 text-xs font-extrabold rounded-full">
+                        <span className="inline-block px-2.5 py-0.5 bg-teal-50 text-teal-800 border border-teal-200 text-xs font-extrabold rounded-full self-center sm:self-auto">
                           {item.price}
                         </span>
                       )}
                     </div>
-                    <h3 className="font-extrabold text-emerald-950 text-lg leading-snug">{item.model}</h3>
-                    <div className="mt-2 text-xs text-emerald-800 space-y-0.5">
-                      <p>Zalecany rozmiar: <span className="font-bold text-emerald-950 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">{item.recommended_size}</span></p>
-                      <p>Wymagana wkładka: <span className="font-semibold">{item.insole_cm} cm</span></p>
+
+                    <h3 className="font-extrabold text-emerald-950 text-lg leading-snug">
+                      {item.model}
+                    </h3>
+
+                    <div className="pt-1 text-xs text-emerald-800 space-y-0.5">
+                      <p>
+                        Zalecany rozmiar: <span className="font-bold text-emerald-950 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">EU {item.recommended_size}</span>
+                      </p>
+                      <p className="text-emerald-700">
+                        Wkładka: <span className="font-semibold">{item.insole_cm} cm</span>
+                      </p>
                     </div>
                   </div>
 
-                  {/* PRZYCISK DO KONKRETNEJ OFERTY */}
-                  <div className="w-full sm:w-auto flex-shrink-0">
+                  {/* PRZYCISK PRZEKIEROWANIA */}
+                  <div className="w-full sm:w-auto flex-shrink-0 pt-2 sm:pt-0">
                     <a
                       href={item.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full sm:w-auto inline-flex justify-center items-center px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition shadow-md"
+                      className="w-full sm:w-auto inline-flex justify-center items-center px-5 py-3 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-sm font-bold rounded-xl transition shadow-md gap-1"
                     >
                       Sprawdź ofertę ➔
                     </a>
                   </div>
-
                 </div>
               ))}
             </div>
 
-            {visibleCount < results.length && (
-              <button
-                onClick={() => setVisibleCount(visibleCount + 5)}
-                className="w-full py-3 bg-emerald-100/80 hover:bg-emerald-200 text-emerald-900 font-bold rounded-2xl transition text-sm shadow-sm mt-4"
-              >
-                Pokaż kolejne oferty 👇
-              </button>
-            )}
           </div>
         )}
       </div>
