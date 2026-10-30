@@ -39,7 +39,7 @@ export default function Home() {
     const lengthNum = parseFloat(footLength);
 
     if (isNaN(lengthNum) || lengthNum < 9 || lengthNum > 35) {
-      setError('Długość stopy musi wynosić od 9.0 cm do 35.0 cm.');
+      setError('Długość stopy musi wynosić od 9.0 cm do 35.0 cm. ');
       return;
     }
 
