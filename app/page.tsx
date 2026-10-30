@@ -39,7 +39,7 @@ export default function Home() {
     const lengthNum = parseFloat(footLength);
 
     if (isNaN(lengthNum) || lengthNum < 9 || lengthNum > 35) {
-      setError('Długość stopy musi wynosić od 9.0 cm do 35.0 cm. ');
+      setError('Długość stopy musi wynosić od 9.0 cm do 35.0 cm.');
       return;
     }
 
@@ -68,8 +68,15 @@ export default function Home() {
         body: JSON.stringify(payload),
       });
 
+      // Pobieramy dokładną treść błędu z serwera FastAPI, jeśli status nie jest OK
       if (!res.ok) {
-        throw new Error(`Błąd serwera: ${res.status}`);
+        let errorData;
+        try {
+          errorData = await res.json();
+        } catch {
+          errorData = { detail: `Błąd serwera (status: ${res.status})` };
+        }
+        throw new Error(errorData.detail || `Błąd serwera: ${res.status}`);
       }
 
       const data = await res.json();
@@ -77,7 +84,8 @@ export default function Home() {
       setAiGreeting(data.ai_greeting || '');
       setCooldown(15);
     } catch (err: any) {
-      setError('Nie udało się połączyć z serwerem. Spróbuj ponownie za chwilę.');
+      console.error('Szczegóły błędu:', err);
+      setError(`Błąd połączenia: ${err.message || 'Sprawdź konsolę lub upewnij się, że serwer na Renderze nie śpi.'}`);
     } finally {
       setLoading(false);
     }
@@ -240,7 +248,7 @@ export default function Home() {
           </div>
 
           {error && (
-            <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-2xl shadow-sm">
+            <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-2xl shadow-sm font-mono">
               {error}
             </div>
           )}
